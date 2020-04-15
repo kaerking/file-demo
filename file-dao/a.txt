@@ -1,0 +1,116 @@
+SELECT * FROM t_org WHERE pbiid = 0;
+
+INSERT INTO t_org VALUES (UUID(),0,'root','service','ABCD',1,2,1);
+
+//加产品线
+SELECT * FROM t_org WHERE pbiid = 'xxx';
+
+//如果没有的话 添加
+
+//查询父节点
+SELECT nsright FROM t_org WHERE pbiid = 0;
+
+//更新父节点
+
+UPDATE t_org SET nsleft = nsleft +2 WHERE nsleft >4;
+
+UPDATE t_org SET nsright = nsright +2 WHERE nsright >=4;
+`t_organization`
+//添加
+
+INSERT INTO t_org VALUES (UUID(),11,'pline2','vrc','r2',4,4+1,2);
+
+
+//test  nsright = 3
+SELECT * FROM t_org WHERE pbiid = 10;
+
+UPDATE t_org SET nsleft = nsleft +2 WHERE nsleft >3;
+
+UPDATE t_org SET nsright = nsright +2 WHERE nsright >=3;
+
+INSERT INTO t_org VALUES (UUID(),100,'product1','vrc','r11',3,3+1,3);
+//test
+
+//test nsright = 4
+SELECT * FROM t_org WHERE pbiid = 100;
+
+UPDATE t_org SET nsleft = nsleft +2 WHERE nsleft >4;
+
+UPDATE t_org SET nsright = nsright +2 WHERE nsright >=4;
+
+INSERT INTO t_org VALUES (UUID(),1000,'productversion1','vrc','real1',4,4+1,4);
+
+
+//test 6
+SELECT * FROM t_org WHERE pbiid = 10;
+
+UPDATE t_org SET nsleft = nsleft +2 WHERE nsleft >10;
+
+UPDATE t_org SET nsright = nsright +2 WHERE nsright >=10;
+
+INSERT INTO t_org VALUES (UUID(),1002,'productversion3','vrc','real3',10,10+1,3);
+
+
+//查询 pbiid = 10
+
+SELECT c.* FROM t_org p, t_org c WHERE p.pbiid =10 AND  c.nsleft > p.nsleft AND c.nsleft <p.nsright;
+
+
+//添加字表
+SELECT * FROM t_soft;
+INSERT INTO t_soft VALUES ('real1', 'aaa', 'L','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real1', 'bbb', 'D','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real1', 'ccc', 'D','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real2', 'aaa', 'L','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real2', 'ddd', 'D','B','Thrid');
+
+INSERT INTO t_soft VALUES ('real3', 'aaaa', 'L','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real3', 'bbbb', 'D','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real3', 'cccc', 'D','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real3', 'eeee', 'L','B','OpenSouce');
+
+INSERT INTO t_soft VALUES ('real3', 'dddd', 'D','B','Thrid');
+
+
+SELECT parent.`name`,COUNT(s.`name`) FROM t_org AS node ,t_org AS parent, t_soft AS s WHERE node.`nsleft` > parent.`nsleft` AND node.`nsleft` < parent.`nsright` AND node.`riskinfo_id` = s.`riskInfo_id`  GROUP BY parent.`name` ORDER BY node.`nsleft` DESC;
+
+//查询所有产品    productid = 100 
+SELECT node.`name`,COUNT(s.`name`) FROM t_org AS node ,t_org AS parent, t_soft AS s WHERE node.`nsleft` > parent.`nsleft` AND node.`nsleft` < parent.`nsright` AND node.`riskinfo_id` = s.`riskInfo_id`  AND parent.pbiid = 100 GROUP BY node.`name` ORDER BY node.`nsleft` DESC;
+
+
+//查询所有产品    productid = 10 
+SELECT parent.`name`,COUNT(CASE WHEN s.lifeStatus = 'D' THEN 1 ELSE NULL END) AS lifeStatus,COUNT(CASE WHEN s.level = 'B' THEN 1 ELSE NULL END) AS lev
+ FROM t_org AS node ,t_org AS parent, t_soft AS s WHERE node.`nsleft` > parent.`nsleft` AND node.`nsleft` < parent.`nsright` AND node.`riskinfo_id` = s.`riskInfo_id` AND parent.depth = 3 GROUP BY parent.`name`,s.name ORDER BY node.`nsleft` DESC;
+ 
+ /*DDL 信息*/------------
+
+CREATE TABLE `t_org` (
+  `org_id` VARCHAR(200) COLLATE utf8_bin NOT NULL COMMENT '主键id',
+  `pbiid` INT(20) DEFAULT NULL,
+  `name` VARCHAR(100) COLLATE utf8_bin DEFAULT NULL,
+  `offering_type` VARCHAR(10) COLLATE utf8_bin DEFAULT NULL,
+  `riskinfo_id` VARCHAR(200) COLLATE utf8_bin DEFAULT NULL,
+  `nsleft` INT(20) DEFAULT NULL,
+  `nsright` INT(20) DEFAULT NULL,
+  `depth` INT(20) DEFAULT NULL,
+  PRIMARY KEY (`org_id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+
+/*DDL 信息*/------------
+
+CREATE TABLE `t_soft` (
+  `riskInfo_id` VARCHAR(200) COLLATE utf8_bin NOT NULL,
+  `name` VARCHAR(100) COLLATE utf8_bin DEFAULT NULL,
+  `lifeStatus` VARCHAR(10) COLLATE utf8_bin DEFAULT NULL,
+  `level` VARCHAR(10) COLLATE utf8_bin DEFAULT NULL,
+  `type` VARCHAR(20) COLLATE utf8_bin DEFAULT NULL
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COLLATE=utf8_bin
+
+
