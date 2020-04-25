@@ -1,0 +1,68 @@
+package com.hdfs.test.demo.config;
+
+import org.apache.ibatis.executor.resultset.ResultSetHandler;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.*;
+import org.springframework.stereotype.Component;
+
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Properties;
+
+
+@Intercepts({
+        @Signature(type = ResultSetHandler.class, method = "handleResultSets", args={Statement.class})
+})
+@Component
+public class PermissionHelper implements Interceptor {
+/*    @Override
+    public Object intercept(Invocation invocation) throws Throwable {
+        final Object[] args = invocation.getArgs();
+        MappedStatement ms = (MappedStatement) args[0];
+        Object parameterObject = args[1];
+        BoundSql boundSql = ms.getBoundSql(parameterObject);
+        String sql = boundSql.getSql();
+
+        return invocation.proceed();
+    }*/
+
+    @Override
+    public Object intercept(Invocation invocation) throws Throwable {
+        ResultSetHandler resultSetHandler1 = (ResultSetHandler) invocation.getTarget();
+        //通过java反射获得mappedStatement属性值
+        //可以获得mybatis里的resultype
+        MappedStatement mappedStatement = (MappedStatement) ReflectUtil.getFieldValue(resultSetHandler1, "mappedStatement");
+        String id = mappedStatement.getId();
+        //获取切面对象
+       // PermissionAop permissionAop = PermissionUtils.getPermissionByDelegate(mappedStatement);
+
+        //执行请求方法，并将所得结果保存到result中
+        Object result = invocation.proceed();
+
+        if(result instanceof ArrayList){
+            ArrayList list = (ArrayList)result;
+            System.out.println(list);
+        }
+
+        // 获取到当前的Statement
+/*        Statement stmt =  (Statement) args[0];
+        // 通过Statement获得当前结果集
+        ResultSet resultSet = stmt.getResultSet();
+        List<Object> resultList = new ArrayList<Object>();
+        while (resultSet != null && resultSet.next()) {
+            String infos = resultSet.getString("pbiid");
+            System.out.println(infos);
+        }*/
+        return invocation.proceed();
+    }
+
+    @Override
+    public Object plugin(Object target) {
+            return Plugin.wrap(target, this);
+    }
+
+    @Override
+    public void setProperties(Properties properties) {
+
+    }
+}
