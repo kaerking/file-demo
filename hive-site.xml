@@ -20,3 +20,5 @@
                 <description>passwordtouseagainstmetastoredatabase</description>
         </property>
 </configuration>
+export HADOOP_HOME=0000000000000
+export HIVE_CONF_DIR=000000000000
